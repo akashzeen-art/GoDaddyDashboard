@@ -1,0 +1,19 @@
+# Secrets — never commit these
+backend/.env
+backend/src/main/resources/application-local.properties
+
+# Java build
+backend/target/
+backend/*.jar
+
+# Node / React
+frontend/node_modules/
+frontend/dist/
+frontend/.env
+frontend/.env.local
+
+# IDE
+.idea/
+*.iml
+.vscode/
+.DS_Store
