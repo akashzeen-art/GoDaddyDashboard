@@ -4,13 +4,13 @@
 #   ln -sf /etc/nginx/sites-available/godaddy-dashboard /etc/nginx/sites-enabled/
 #   nginx -t && systemctl reload nginx
 #
-# HTTPS (after HTTP works):
-#   certbot --nginx -d godaddy.v1mobi.com -d www.godaddy.v1mobi.com
+# HTTPS (after HTTP works) — www only if DNS exists for www.godaddy.v1mobi.com:
+#   certbot --nginx -d godaddy.v1mobi.com
 
 server {
     listen 80;
     listen [::]:80;
-    server_name godaddy.v1mobi.com www.godaddy.v1mobi.com;
+    server_name godaddy.v1mobi.com;
 
     root /var/www/dashboard/godaddy/frontend/dist;
     index index.html;

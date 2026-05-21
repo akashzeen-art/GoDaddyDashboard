@@ -1,17 +1,17 @@
 # Use this ONLY if you already have Let's Encrypt certs and certbot did not auto-edit nginx.
-# Usually: certbot --nginx -d godaddy.v1mobi.com -d www.godaddy.v1mobi.com
+# Usually: certbot --nginx -d godaddy.v1mobi.com
 
 server {
     listen 80;
     listen [::]:80;
-    server_name godaddy.v1mobi.com www.godaddy.v1mobi.com;
+    server_name godaddy.v1mobi.com;
     return 301 https://$host$request_uri;
 }
 
 server {
     listen 443 ssl http2;
     listen [::]:443 ssl http2;
-    server_name godaddy.v1mobi.com www.godaddy.v1mobi.com;
+    server_name godaddy.v1mobi.com;
 
     ssl_certificate /etc/letsencrypt/live/godaddy.v1mobi.com/fullchain.pem;
     ssl_certificate_key /etc/letsencrypt/live/godaddy.v1mobi.com/privkey.pem;

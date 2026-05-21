@@ -137,8 +137,10 @@ DNS `godaddy.v1mobi.com` → server IP first. Then:
 
 ```bash
 apt install -y certbot python3-certbot-nginx
-certbot --nginx -d godaddy.v1mobi.com -d www.godaddy.v1mobi.com
+certbot --nginx -d godaddy.v1mobi.com
 ```
+
+Add `-d www.godaddy.v1mobi.com` only after you create a DNS A record for `www`.
 
 Certbot edits **only** the `godaddy-dashboard` vhost. Other sites stay unchanged.
 
