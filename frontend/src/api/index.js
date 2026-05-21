@@ -2,6 +2,9 @@ import axios from 'axios'
 
 const api = axios.create({ baseURL: '/api' })
 
+/** No JWT — used for login only */
+const publicApi = axios.create({ baseURL: '/api' })
+
 api.interceptors.request.use((config) => {
   const token = localStorage.getItem('token')
   if (token) {
@@ -16,7 +19,7 @@ api.interceptors.response.use(
 )
 
 export const authApi = {
-  login: (data) => api.post('/auth/login', data),
+  login: (data) => publicApi.post('/auth/login', data),
 }
 
 export const accountsApi = {

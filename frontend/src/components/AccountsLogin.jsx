@@ -16,8 +16,13 @@ export default function AccountsLogin() {
       const { data } = await authApi.login(form)
       login(data.token, data.email)
       toast.success('Unlocked — you can manage API keys')
-    } catch {
-      toast.error('Invalid email or password')
+    } catch (err) {
+      const status = err.response?.status
+      if (status === 403 || status === 401) {
+        toast.error(err.response?.data?.error || 'Invalid email or password')
+      } else {
+        toast.error('Login failed — try again')
+      }
     } finally {
       setLoading(false)
     }
