@@ -115,15 +115,34 @@ nano /etc/nginx/sites-available/godaddy-dashboard
 
 ln -sf /etc/nginx/sites-available/godaddy-dashboard /etc/nginx/sites-enabled/
 
-# Important: remove default site if you see "Welcome to nginx!"
-rm -f /etc/nginx/sites-enabled/default
-
 nginx -t && systemctl reload nginx
 ```
 
-Open `http://YOUR_DOMAIN` in the browser.
+Open `http://godaddy.v1mobi.com` in the browser.
 
-**Seeing "Welcome to nginx!"?** Another site is the `default_server`. Run `ls /etc/nginx/sites-enabled/` and remove `default`, or set `server_name` to match your domain exactly.
+**Seeing "Welcome to nginx!" on a multi-site server?** Do **not** remove `default` or other sites. Only fix this file:
+
+```bash
+cp /var/www/dashboard/godaddy/deploy/nginx-godaddy-dashboard.conf.example \
+   /etc/nginx/sites-available/godaddy-dashboard
+nginx -t && systemctl reload nginx
+curl -s http://127.0.0.1/ -H "Host: godaddy.v1mobi.com" | head -3
+```
+
+Must show `<!doctype html>`, not "Welcome to nginx!".
+
+### HTTPS (Let's Encrypt)
+
+DNS `godaddy.v1mobi.com` → server IP first. Then:
+
+```bash
+apt install -y certbot python3-certbot-nginx
+certbot --nginx -d godaddy.v1mobi.com -d www.godaddy.v1mobi.com
+```
+
+Certbot edits **only** the `godaddy-dashboard` vhost. Other sites stay unchanged.
+
+Open `https://godaddy.v1mobi.com`.
 
 ## 5. Updates (after you push to GitHub)
 
