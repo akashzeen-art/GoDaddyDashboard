@@ -1,8 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate, Outlet } from 'react-router-dom'
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { Toaster } from 'react-hot-toast'
-import { AuthProvider, useAuth } from './context/AuthContext'
-import LoginPage from './pages/LoginPage'
+import { AuthProvider } from './context/AuthContext'
 import DashboardPage from './pages/DashboardPage'
 import AccountsPage from './pages/AccountsPage'
 import Sidebar from './components/Sidebar'
@@ -11,9 +10,7 @@ const queryClient = new QueryClient({
   defaultOptions: { queries: { retry: 1, staleTime: 60_000 } },
 })
 
-function ProtectedLayout() {
-  const { isAuthenticated } = useAuth()
-  if (!isAuthenticated) return <Navigate to="/login" replace />
+function AppLayout() {
   return (
     <div className="flex h-screen overflow-hidden">
       <Sidebar />
@@ -30,11 +27,11 @@ export default function App() {
       <AuthProvider>
         <BrowserRouter>
           <Routes>
-            <Route path="/login" element={<LoginPage />} />
-            <Route element={<ProtectedLayout />}>
+            <Route element={<AppLayout />}>
               <Route path="/" element={<DashboardPage />} />
               <Route path="/accounts" element={<AccountsPage />} />
             </Route>
+            <Route path="/login" element={<Navigate to="/accounts" replace />} />
             <Route path="*" element={<Navigate to="/" replace />} />
           </Routes>
         </BrowserRouter>

@@ -1,15 +1,13 @@
 import { useState } from 'react'
-import { useNavigate } from 'react-router-dom'
 import { authApi } from '../api'
 import { useAuth } from '../context/AuthContext'
 import toast from 'react-hot-toast'
-import { Globe, Lock, Mail } from 'lucide-react'
+import { Server, Lock, Mail } from 'lucide-react'
 
-export default function LoginPage() {
+export default function AccountsLogin() {
   const [form, setForm] = useState({ email: '', password: '' })
   const [loading, setLoading] = useState(false)
   const { login } = useAuth()
-  const navigate = useNavigate()
 
   const handleSubmit = async (e) => {
     e.preventDefault()
@@ -17,7 +15,7 @@ export default function LoginPage() {
     try {
       const { data } = await authApi.login(form)
       login(data.token, data.email)
-      navigate('/')
+      toast.success('Unlocked — you can manage API keys')
     } catch {
       toast.error('Invalid email or password')
     } finally {
@@ -26,14 +24,16 @@ export default function LoginPage() {
   }
 
   return (
-    <div className="min-h-screen flex items-center justify-center" style={{ background: 'var(--bg-primary)' }}>
-      <div className="card w-full max-w-sm">
-        <div className="flex flex-col items-center mb-8">
+    <div className="flex-1 overflow-auto p-6 flex items-center justify-center">
+      <div className="card w-full max-w-md">
+        <div className="flex flex-col items-center mb-6 text-center">
           <div className="p-3 rounded-full mb-3" style={{ background: 'rgba(99,102,241,0.15)' }}>
-            <Globe size={28} color="#6366f1" />
+            <Server size={28} color="#6366f1" />
           </div>
-          <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Domain Dashboard</h1>
-          <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>Sign in with your email</p>
+          <h1 className="text-xl font-bold">Accounts locked</h1>
+          <p className="text-sm mt-2" style={{ color: 'var(--text-secondary)' }}>
+            Sign in to add GoDaddy accounts and manage API keys. The dashboard stays open without login.
+          </p>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
@@ -70,7 +70,7 @@ export default function LoginPage() {
           </div>
 
           <button type="submit" className="btn-primary mt-2" disabled={loading}>
-            {loading ? 'Signing in...' : 'Sign In'}
+            {loading ? 'Unlocking...' : 'Unlock Accounts'}
           </button>
         </form>
       </div>

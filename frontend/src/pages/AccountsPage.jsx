@@ -1,12 +1,24 @@
 import { useState } from 'react'
 import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { accountsApi, domainsApi } from '../api'
+import { useAuth } from '../context/AuthContext'
+import AccountsLogin from '../components/AccountsLogin'
 import AddAccountModal from '../components/AddAccountModal'
 import { Plus, Trash2, RefreshCw, Server } from 'lucide-react'
 import { format } from 'date-fns'
 import toast from 'react-hot-toast'
 
 export default function AccountsPage() {
+  const { isAuthenticated } = useAuth()
+
+  if (!isAuthenticated) {
+    return <AccountsLogin />
+  }
+
+  return <AccountsManager />
+}
+
+function AccountsManager() {
   const qc = useQueryClient()
   const [showModal, setShowModal] = useState(false)
   const [syncingId, setSyncingId] = useState(null)
@@ -46,7 +58,7 @@ export default function AccountsPage() {
         <div>
           <h1 className="text-xl font-bold">GoDaddy Accounts</h1>
           <p className="text-sm mt-0.5" style={{ color: 'var(--text-secondary)' }}>
-            Manage connected GoDaddy accounts
+            Manage API keys and secrets (admin only)
           </p>
         </div>
         <button className="btn-primary flex items-center gap-2" onClick={() => setShowModal(true)}>
