@@ -1,6 +1,7 @@
 import { useState } from 'react'
-import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query'
+import { useQuery, useQueryClient } from '@tanstack/react-query'
 import { domainsApi } from '../api'
+import PageHeader from '../components/PageHeader'
 import StatCard from '../components/StatCard'
 import DomainTable from '../components/DomainTable'
 import { Globe, AlertTriangle, Server, XCircle, RefreshCw } from 'lucide-react'
@@ -10,13 +11,13 @@ export default function DashboardPage() {
   const qc = useQueryClient()
   const [syncing, setSyncing] = useState(false)
 
-  const { data: stats } = useQuery({
+  const { data: stats, isLoading: statsLoading } = useQuery({
     queryKey: ['stats'],
     queryFn: () => domainsApi.getStats().then(r => r.data),
     refetchInterval: 5 * 60 * 1000,
   })
 
-  const { data: domains = [], refetch: refetchDomains } = useQuery({
+  const { data: domains = [], refetch: refetchDomains, isLoading: domainsLoading } = useQuery({
     queryKey: ['domains'],
     queryFn: () => domainsApi.getAll().then(r => r.data),
     refetchInterval: 5 * 60 * 1000,
@@ -36,28 +37,49 @@ export default function DashboardPage() {
   }
 
   return (
-    <div className="flex-1 overflow-auto p-6">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-xl font-bold">Domain Overview</h1>
-          <p className="text-sm mt-0.5" style={{ color: 'var(--text-secondary)' }}>
-            All domains across connected GoDaddy accounts
-          </p>
-        </div>
-        <button className="btn-primary flex items-center gap-2" onClick={handleSync} disabled={syncing}>
-          <RefreshCw size={14} className={syncing ? 'animate-spin' : ''} />
-          {syncing ? 'Syncing...' : 'Sync All'}
-        </button>
+    <div className="page-content flex-1 overflow-auto">
+      <PageHeader
+        title="Domain Overview"
+        subtitle="Monitor expiry, status, and tags across all GoDaddy accounts"
+        action={
+          <button className="btn-primary flex items-center gap-2" onClick={handleSync} disabled={syncing}>
+            <RefreshCw size={16} className={syncing ? 'animate-spin' : ''} />
+            {syncing ? 'Syncing...' : 'Sync All'}
+          </button>
+        }
+      />
+
+      <div
+        className="grid gap-4 mb-8"
+        style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(220px, 1fr))' }}>
+        <StatCard
+          title="Total Domains"
+          value={statsLoading ? '…' : stats?.totalDomains}
+          icon={Globe}
+          color="#6366f1"
+        />
+        <StatCard
+          title="Expiring Soon"
+          value={statsLoading ? '…' : stats?.expiringSoon}
+          icon={AlertTriangle}
+          color="#facc15"
+          subtitle="Next 30 days"
+        />
+        <StatCard
+          title="Accounts"
+          value={statsLoading ? '…' : stats?.totalAccounts}
+          icon={Server}
+          color="#4ade80"
+        />
+        <StatCard
+          title="Expired"
+          value={statsLoading ? '…' : stats?.expiredDomains}
+          icon={XCircle}
+          color="#f87171"
+        />
       </div>
 
-      <div className="grid grid-cols-2 gap-4 mb-6" style={{ gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))' }}>
-        <StatCard title="Total Domains" value={stats?.totalDomains} icon={Globe} color="#6366f1" />
-        <StatCard title="Expiring Soon" value={stats?.expiringSoon} icon={AlertTriangle} color="#facc15" subtitle="Next 30 days" />
-        <StatCard title="Accounts Connected" value={stats?.totalAccounts} icon={Server} color="#4ade80" />
-        <StatCard title="Expired" value={stats?.expiredDomains} icon={XCircle} color="#f87171" />
-      </div>
-
-      <DomainTable domains={domains} onRefresh={refetchDomains} />
+      <DomainTable domains={domains} onRefresh={refetchDomains} loading={domainsLoading} />
     </div>
   )
 }

@@ -4,7 +4,8 @@ import { accountsApi, domainsApi } from '../api'
 import { useAuth } from '../context/AuthContext'
 import AccountsLogin from '../components/AccountsLogin'
 import AddAccountModal from '../components/AddAccountModal'
-import { Plus, Trash2, RefreshCw, Server } from 'lucide-react'
+import PageHeader from '../components/PageHeader'
+import { Plus, Trash2, RefreshCw, Server, KeyRound } from 'lucide-react'
 import { format } from 'date-fns'
 import toast from 'react-hot-toast'
 
@@ -23,7 +24,7 @@ function AccountsManager() {
   const [showModal, setShowModal] = useState(false)
   const [syncingId, setSyncingId] = useState(null)
 
-  const { data: accounts = [], refetch } = useQuery({
+  const { data: accounts = [], refetch, isLoading } = useQuery({
     queryKey: ['accounts'],
     queryFn: () => accountsApi.getAll().then(r => r.data),
   })
@@ -53,37 +54,53 @@ function AccountsManager() {
   }
 
   return (
-    <div className="flex-1 overflow-auto p-6">
-      <div className="flex items-center justify-between mb-6">
-        <div>
-          <h1 className="text-xl font-bold">GoDaddy Accounts</h1>
-          <p className="text-sm mt-0.5" style={{ color: 'var(--text-secondary)' }}>
-            Manage API keys and secrets (admin only)
-          </p>
-        </div>
-        <button className="btn-primary flex items-center gap-2" onClick={() => setShowModal(true)}>
-          <Plus size={14} /> Add Account
-        </button>
-      </div>
+    <div className="page-content flex-1 overflow-auto">
+      <PageHeader
+        title="GoDaddy Accounts"
+        subtitle="Add accounts and manage encrypted API keys & secrets"
+        action={
+          <button className="btn-primary flex items-center gap-2" onClick={() => setShowModal(true)}>
+            <Plus size={16} /> Add Account
+          </button>
+        }
+      />
 
-      {accounts.length === 0 ? (
-        <div className="card flex flex-col items-center py-16" style={{ color: 'var(--text-secondary)' }}>
-          <Server size={40} style={{ opacity: 0.3, marginBottom: '1rem' }} />
-          <p className="font-medium">No accounts connected</p>
-          <p className="text-sm mt-1">Add a GoDaddy account to get started</p>
-          <button className="btn-primary mt-4" onClick={() => setShowModal(true)}>Add Account</button>
+      {isLoading ? (
+        <div className="card flex items-center justify-center py-20" style={{ color: 'var(--text-muted)' }}>
+          Loading accounts…
+        </div>
+      ) : accounts.length === 0 ? (
+        <div className="card flex flex-col items-center py-20">
+          <div className="empty-state-icon">
+            <KeyRound size={32} color="#6366f1" style={{ opacity: 0.8 }} />
+          </div>
+          <p className="font-semibold text-lg">No accounts yet</p>
+          <p className="text-sm mt-1 mb-6 text-center max-w-sm" style={{ color: 'var(--text-secondary)' }}>
+            Connect a GoDaddy account with your API key and secret to sync domains.
+          </p>
+          <button className="btn-primary flex items-center gap-2" onClick={() => setShowModal(true)}>
+            <Plus size={16} /> Add your first account
+          </button>
         </div>
       ) : (
-        <div className="grid gap-4" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(300px, 1fr))' }}>
+        <div className="grid gap-5" style={{ gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))' }}>
           {accounts.map(acc => (
-            <div key={acc.id} className="card">
-              <div className="flex items-start justify-between mb-3">
+            <div key={acc.id} className="card card-interactive">
+              <div className="flex items-start justify-between mb-4">
                 <div className="flex items-center gap-3">
-                  <div className="p-2 rounded-lg" style={{ background: 'rgba(99,102,241,0.15)' }}>
-                    <Server size={16} color="#6366f1" />
+                  <div
+                    className="p-2.5 rounded-xl"
+                    style={{
+                      background: 'rgba(99, 102, 241, 0.15)',
+                      border: '1px solid rgba(99, 102, 241, 0.25)',
+                    }}>
+                    <Server size={20} color="#818cf8" strokeWidth={2} />
                   </div>
                   <div>
-                    <p className="font-semibold text-sm">{acc.accountName}</p>
+                    <p className="font-bold text-base">{acc.accountName}</p>
+                    <p className="text-xs mt-0.5" style={{ color: 'var(--text-muted)' }}>
+                      GoDaddy account
+                    </p>
                   </div>
                 </div>
                 <span className={`badge ${acc.active ? 'badge-active' : 'badge-expired'}`}>
@@ -91,25 +108,31 @@ function AccountsManager() {
                 </span>
               </div>
 
-              <div className="flex items-center justify-between text-sm mb-4">
-                <span style={{ color: 'var(--text-secondary)' }}>
-                  {acc.domainCount} domains
+              <div
+                className="flex items-center justify-between text-sm py-3 px-3 rounded-lg mb-4"
+                style={{ background: 'rgba(15, 23, 42, 0.5)', border: '1px solid var(--border)' }}>
+                <span className="font-semibold tabular-nums" style={{ color: '#c7d2fe' }}>
+                  {acc.domainCount} <span className="font-normal" style={{ color: 'var(--text-secondary)' }}>domains</span>
                 </span>
-                <span style={{ color: 'var(--text-secondary)', fontSize: '0.75rem' }}>
-                  {acc.lastSyncedAt ? `Synced ${format(new Date(acc.lastSyncedAt), 'MMM dd, HH:mm')}` : 'Never synced'}
+                <span className="text-xs" style={{ color: 'var(--text-muted)' }}>
+                  {acc.lastSyncedAt ? format(new Date(acc.lastSyncedAt), 'MMM dd, HH:mm') : 'Never synced'}
                 </span>
               </div>
 
               <div className="flex gap-2">
-                <button className="btn-ghost flex-1 flex items-center justify-center gap-1 text-sm"
-                  onClick={() => handleSync(acc.id)} disabled={syncingId === acc.id}>
-                  <RefreshCw size={12} className={syncingId === acc.id ? 'animate-spin' : ''} />
-                  {syncingId === acc.id ? 'Syncing...' : 'Sync'}
+                <button
+                  type="button"
+                  className="btn-ghost flex-1 flex items-center justify-center gap-2"
+                  onClick={() => handleSync(acc.id)}
+                  disabled={syncingId === acc.id}>
+                  <RefreshCw size={14} className={syncingId === acc.id ? 'animate-spin' : ''} />
+                  {syncingId === acc.id ? 'Syncing…' : 'Sync'}
                 </button>
-                <button className="btn-ghost flex items-center gap-1 text-sm"
-                  style={{ color: '#f87171', borderColor: 'rgba(239,68,68,0.3)' }}
+                <button
+                  type="button"
+                  className="btn-ghost btn-danger-ghost flex items-center gap-2"
                   onClick={() => handleDelete(acc.id, acc.accountName)}>
-                  <Trash2 size={12} /> Remove
+                  <Trash2 size={14} /> Remove
                 </button>
               </div>
             </div>
