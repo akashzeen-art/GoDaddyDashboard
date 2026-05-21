@@ -1,6 +1,8 @@
-# Use this ONLY if you already have Let's Encrypt certs and certbot did not auto-edit nginx.
-# Usually: certbot --nginx -d godaddy.v1mobi.com
+# /etc/nginx/sites-available/godaddy-dashboard
+# FULL production config — use AFTER: certbot --nginx -d godaddy.v1mobi.com
+# Replaces the whole file, then: nginx -t && systemctl reload nginx
 
+# HTTP → HTTPS redirect
 server {
     listen 80;
     listen [::]:80;
@@ -8,6 +10,7 @@ server {
     return 301 https://$host$request_uri;
 }
 
+# HTTPS — dashboard + API
 server {
     listen 443 ssl http2;
     listen [::]:443 ssl http2;

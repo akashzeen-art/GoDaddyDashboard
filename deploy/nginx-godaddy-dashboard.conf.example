@@ -1,11 +1,5 @@
-# Only for godaddy.v1mobi.com — does NOT change other nginx sites.
-# Install:
-#   cp deploy/nginx-godaddy-dashboard.conf.example /etc/nginx/sites-available/godaddy-dashboard
-#   ln -sf /etc/nginx/sites-available/godaddy-dashboard /etc/nginx/sites-enabled/
-#   nginx -t && systemctl reload nginx
-#
-# HTTPS (after HTTP works) — www only if DNS exists for www.godaddy.v1mobi.com:
-#   certbot --nginx -d godaddy.v1mobi.com
+# /etc/nginx/sites-available/godaddy-dashboard
+# Only matches godaddy.v1mobi.com — other VPS sites unchanged.
 
 server {
     listen 80;
@@ -29,5 +23,5 @@ server {
     }
 }
 
-# Certbot will add a second "server { listen 443 ssl ... }" block automatically.
-# Do NOT add "default_server" here — other apps on this VPS stay untouched.
+# HTTPS: certbot --nginx -d godaddy.v1mobi.com
+# (adds 443 block + redirect automatically)
