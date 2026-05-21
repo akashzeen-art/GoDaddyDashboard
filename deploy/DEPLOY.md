@@ -2,6 +2,36 @@
 
 Target server example: `root@content` → path `/var/www/dashboard/godaddy`
 
+---
+
+## Folders already exist (your case)
+
+If `/var/www/dashboard/godaddy` is already created, **skip `mkdir` and `git clone`**. Use this flow:
+
+```bash
+cd /var/www/dashboard/godaddy
+
+# First time only: pull code into this folder
+if [ ! -d .git ]; then
+  git clone https://github.com/akashzeen-art/GoDaddyDashboard.git .
+else
+  git pull origin main
+fi
+```
+
+Then run backend → frontend → nginx steps below (sections 2–4).
+
+**One-shot script (after `.env` exists):**
+
+```bash
+cd /var/www/dashboard/godaddy/backend && chmod +x mvnw && ./mvnw -DskipTests package
+cd /var/www/dashboard/godaddy/frontend && npm ci && npm run build
+systemctl restart godaddy-dashboard 2>/dev/null || true
+nginx -t && systemctl reload nginx
+```
+
+---
+
 ## Server prerequisites
 
 ```bash
@@ -13,14 +43,24 @@ curl -fsSL https://deb.nodesource.com/setup_20.x | bash -
 apt install -y nodejs
 ```
 
-## 1. Clone the project on the server
+## 1. Get the code on the server
+
+**New server (no folder yet):**
 
 ```bash
 mkdir -p /var/www/dashboard
 cd /var/www/dashboard
-
 git clone https://github.com/akashzeen-art/GoDaddyDashboard.git godaddy
 cd godaddy
+```
+
+**Folder already exists** (`/var/www/dashboard/godaddy`):
+
+```bash
+cd /var/www/dashboard/godaddy
+git clone https://github.com/akashzeen-art/GoDaddyDashboard.git .   # if empty, no .git yet
+# OR
+git pull origin main   # if already cloned before
 ```
 
 ## 2. Backend
