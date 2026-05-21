@@ -3,10 +3,10 @@ import { useNavigate } from 'react-router-dom'
 import { authApi } from '../api'
 import { useAuth } from '../context/AuthContext'
 import toast from 'react-hot-toast'
-import { Globe, Lock, User } from 'lucide-react'
+import { Globe, Lock, Mail } from 'lucide-react'
 
 export default function LoginPage() {
-  const [form, setForm] = useState({ username: '', password: '' })
+  const [form, setForm] = useState({ email: '', password: '' })
   const [loading, setLoading] = useState(false)
   const { login } = useAuth()
   const navigate = useNavigate()
@@ -16,10 +16,10 @@ export default function LoginPage() {
     setLoading(true)
     try {
       const { data } = await authApi.login(form)
-      login(data.token, data.username)
+      login(data.token, data.email)
       navigate('/')
     } catch {
-      toast.error('Invalid credentials')
+      toast.error('Invalid email or password')
     } finally {
       setLoading(false)
     }
@@ -33,19 +33,21 @@ export default function LoginPage() {
             <Globe size={28} color="#6366f1" />
           </div>
           <h1 className="text-xl font-bold" style={{ color: 'var(--text-primary)' }}>Domain Dashboard</h1>
-          <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>Sign in to your account</p>
+          <p className="text-sm mt-1" style={{ color: 'var(--text-secondary)' }}>Sign in with your email</p>
         </div>
 
         <form onSubmit={handleSubmit} className="flex flex-col gap-4">
           <div>
-            <label className="text-xs mb-1 block" style={{ color: 'var(--text-secondary)' }}>Username</label>
+            <label className="text-xs mb-1 block" style={{ color: 'var(--text-secondary)' }}>Email</label>
             <div className="relative">
-              <User size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-secondary)' }} />
+              <Mail size={14} className="absolute left-3 top-1/2 -translate-y-1/2" style={{ color: 'var(--text-secondary)' }} />
               <input
+                type="email"
                 style={{ paddingLeft: '2rem' }}
-                value={form.username}
-                onChange={e => setForm(p => ({ ...p, username: e.target.value }))}
-                placeholder="admin"
+                value={form.email}
+                onChange={e => setForm(p => ({ ...p, email: e.target.value }))}
+                placeholder="godaddy@gmail.com"
+                autoComplete="email"
                 required
               />
             </div>
@@ -61,6 +63,7 @@ export default function LoginPage() {
                 value={form.password}
                 onChange={e => setForm(p => ({ ...p, password: e.target.value }))}
                 placeholder="••••••••"
+                autoComplete="current-password"
                 required
               />
             </div>

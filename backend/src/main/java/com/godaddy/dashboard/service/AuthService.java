@@ -20,26 +20,45 @@ public class AuthService {
     private final UserRepository userRepository;
     private final PasswordEncoder passwordEncoder;
 
-    @Value("${app.admin.username:admin}")
-    private String adminUsername;
+    @Value("${app.admin.email:godaddy@gmail.com}")
+    private String adminEmail;
 
-    @Value("${app.admin.password:${ADMIN_PASSWORD:admin123}}")
+    @Value("${app.admin.password:${ADMIN_PASSWORD:Godaddy@123}}")
     private String adminPassword;
 
     @PostConstruct
     public void seedAdmin() {
-        if (userRepository.findByUsername(adminUsername).isEmpty()) {
-            User user = new User();
-            user.setUsername(adminUsername);
-            user.setPassword(passwordEncoder.encode(adminPassword));
-            userRepository.save(user);
-        }
+        upsertAdminUser(adminEmail, adminPassword);
     }
 
     public AuthDto.LoginResponse login(AuthDto.LoginRequest req) {
-        authManager.authenticate(
-                new UsernamePasswordAuthenticationToken(req.getUsername(), req.getPassword()));
-        String token = jwtUtil.generateToken(req.getUsername());
-        return new AuthDto.LoginResponse(token, req.getUsername());
+        String email = resolveEmail(req);
+        authManager.authenticate(new UsernamePasswordAuthenticationToken(email, req.getPassword()));
+        String token = jwtUtil.generateToken(email);
+        return new AuthDto.LoginResponse(token, email);
+    }
+
+    private String resolveEmail(AuthDto.LoginRequest req) {
+        if (req.getEmail() != null && !req.getEmail().isBlank()) {
+            return req.getEmail().trim();
+        }
+        if (req.getUsername() != null && !req.getUsername().isBlank()) {
+            return req.getUsername().trim();
+        }
+        throw new BadCredentialsException("Email is required");
+    }
+
+    private void upsertAdminUser(String email, String rawPassword) {
+        userRepository.findByUsername(email).ifPresentOrElse(
+                user -> {
+                    user.setPassword(passwordEncoder.encode(rawPassword));
+                    userRepository.save(user);
+                },
+                () -> {
+                    User user = new User();
+                    user.setUsername(email);
+                    user.setPassword(passwordEncoder.encode(rawPassword));
+                    userRepository.save(user);
+                });
     }
 }
