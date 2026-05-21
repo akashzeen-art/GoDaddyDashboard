@@ -114,10 +114,16 @@ nano /etc/nginx/sites-available/godaddy-dashboard
 # Set server_name to your domain or IP
 
 ln -sf /etc/nginx/sites-available/godaddy-dashboard /etc/nginx/sites-enabled/
+
+# Important: remove default site if you see "Welcome to nginx!"
+rm -f /etc/nginx/sites-enabled/default
+
 nginx -t && systemctl reload nginx
 ```
 
 Open `http://YOUR_DOMAIN` in the browser.
+
+**Seeing "Welcome to nginx!"?** Another site is the `default_server`. Run `ls /etc/nginx/sites-enabled/` and remove `default`, or set `server_name` to match your domain exactly.
 
 ## 5. Updates (after you push to GitHub)
 

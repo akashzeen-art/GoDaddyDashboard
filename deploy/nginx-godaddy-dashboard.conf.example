@@ -2,9 +2,14 @@
 # Then: ln -s /etc/nginx/sites-available/godaddy-dashboard /etc/nginx/sites-enabled/
 # Replace YOUR_DOMAIN with your real domain or server IP.
 
+# Disable the default site so this vhost is used:
+#   rm -f /etc/nginx/sites-enabled/default
+#   nginx -t && systemctl reload nginx
+
 server {
     listen 80;
-    server_name YOUR_DOMAIN;
+    listen [::]:80;
+    server_name godaddy.v1mobi.com;
 
     root /var/www/dashboard/godaddy/frontend/dist;
     index index.html;
