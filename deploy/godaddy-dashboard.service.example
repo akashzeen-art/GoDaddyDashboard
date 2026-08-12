@@ -10,6 +10,7 @@ Type=simple
 User=root
 WorkingDirectory=/var/www/dashboard/godaddy/backend
 EnvironmentFile=/var/www/dashboard/godaddy/backend/.env
+Environment=SERVER_PORT=8080
 ExecStart=/usr/bin/java -jar /var/www/dashboard/godaddy/backend/target/domain-dashboard-0.0.1-SNAPSHOT.jar
 Restart=on-failure
 RestartSec=10

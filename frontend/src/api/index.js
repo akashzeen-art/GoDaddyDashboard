@@ -15,7 +15,14 @@ api.interceptors.request.use((config) => {
 
 api.interceptors.response.use(
   (res) => res,
-  (err) => Promise.reject(err)
+  (err) => {
+    if (err.response?.status === 401 && !err.config?.url?.includes('/auth/login')) {
+      localStorage.removeItem('token')
+      localStorage.removeItem('email')
+      window.dispatchEvent(new Event('auth:logout'))
+    }
+    return Promise.reject(err)
+  }
 )
 
 export const authApi = {

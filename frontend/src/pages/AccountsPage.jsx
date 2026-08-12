@@ -27,6 +27,7 @@ function AccountsManager() {
   const { data: accounts = [], refetch, isLoading } = useQuery({
     queryKey: ['accounts'],
     queryFn: () => accountsApi.getAll().then(r => r.data),
+    retry: (count, err) => err?.response?.status !== 401 && count < 1,
   })
 
   const handleDelete = async (id, name) => {

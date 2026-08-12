@@ -1,4 +1,4 @@
-import { createContext, useContext, useState } from 'react'
+import { createContext, useContext, useEffect, useState } from 'react'
 
 const AuthContext = createContext(null)
 
@@ -20,6 +20,12 @@ export function AuthProvider({ children }) {
     setToken(null)
     setEmail(null)
   }
+
+  useEffect(() => {
+    const onLogout = () => logout()
+    window.addEventListener('auth:logout', onLogout)
+    return () => window.removeEventListener('auth:logout', onLogout)
+  }, [])
 
   return (
     <AuthContext.Provider value={{ token, email, login, logout, isAuthenticated: !!token }}>
